@@ -9,6 +9,7 @@ import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
+import RevisionBanner from '../components/RevisionBanner.vue'
 import { useAcceptanceStore } from '../stores/acceptance'
 import type { AcceptanceDefect, PartyReply } from '../types/domain'
 
@@ -17,8 +18,10 @@ const toast = useToast()
 const selected = ref<AcceptanceDefect | null>(null)
 const replyVisible = ref(false)
 const retestVisible = ref(false)
+const reopenVisible = ref(false)
 const reply = reactive<PartyReply>({ party: '设备厂家', owner: '', content: '', evidence: '', repliedAt: new Date().toISOString() })
 const retest = reactive({ result: '', passed: true, note: '' })
+const reopenForm = reactive({ reason: '', party: '运维单位' as PartyReply['party'], owner: '' })
 const rows = computed(() => store.defects.filter((item) => !store.keyword || `${item.id} ${item.title} ${item.owner} ${item.status}`.includes(store.keyword)))
 function open(defect: AcceptanceDefect) { selected.value = defect }
 function submitReply() {
@@ -38,12 +41,20 @@ function decide(status: '已关闭' | '带条件通过' | '整改中') {
   const result = store.decideDefect(selected.value.id, status, retest.note)
   toast.add({ severity: result.ok ? 'success' : 'error', summary: result.message, life: 3000 })
 }
+function submitReopen() {
+  if (!selected.value) return
+  const result = store.reopenDefect(selected.value.id, reopenForm.reason, reopenForm.party, reopenForm.owner || '现场负责人')
+  toast.add({ severity: result.ok ? 'success' : 'error', summary: result.ok ? '缺陷已重开' : '无法重开', detail: result.message, life: 3600 })
+  if (result.ok) { reopenVisible.value = false; reopenForm.reason = '' }
+}
+function isClosed(defect: AcceptanceDefect) { return ['已关闭', '带条件通过'].includes(defect.status) }
 </script>
 
 <template>
   <section class="page">
-    <div class="section-head"><div><h2>缺陷闭环处置</h2><p>建设、设备厂家与运维单位分别提交说明，验收负责人决定通过、退回或带条件接受。</p></div><InputText v-model="store.keyword" placeholder="搜索缺陷、责任方或状态" /></div>
-    <DataTable :value="rows" dataKey="id" size="small" selectionMode="single" @rowSelect="(event: any) => open(event.data)">
+    <RevisionBanner />
+    <div class="section-head"><div><h2>缺陷闭环处置</h2><p>建设、设备厂家与运维单位分别提交说明；交付后重开按设备依赖链使所在节点及上游失效，其他节点继续有效。</p></div><InputText v-model="store.keyword" placeholder="搜索缺陷、责任方或状态" /></div>
+    <DataTable :value="rows" dataKey="id" size="small" selectionMode="single" @rowSelect="(event: any) => open(event.data)" :rowClass="(data: any) => !isClosed(data) && store.delivered ? 'row-blocked' : ''">
       <Column field="id" header="编号" />
       <Column field="title" header="缺陷" />
       <Column field="equipmentId" header="设备" />
@@ -54,7 +65,14 @@ function decide(status: '已关闭' | '带条件通过' | '整改中') {
       <Column header="版本"><template #body="{ data }">V{{ data.version }}</template></Column>
     </DataTable>
     <div v-if="selected" class="detail-panel">
-      <div class="detail-title"><div><span>{{ selected.id }} · {{ selected.equipmentId }}</span><h3>{{ selected.title }}</h3></div><div><Button label="多方回复" outlined @click="replyVisible = true" /><Button label="联合复验" @click="retestVisible = true" /></div></div>
+      <div class="detail-title">
+        <div><span>{{ selected.id }} · {{ selected.equipmentId }}</span><h3>{{ selected.title }}</h3></div>
+        <div>
+          <Button label="多方回复" outlined @click="replyVisible = true" />
+          <Button label="联合复验" @click="retestVisible = true" />
+          <Button v-if="isClosed(selected) && store.delivered" label="缺陷重开" severity="danger" outlined @click="reopenVisible = true" />
+        </div>
+      </div>
       <div class="reply-list"><article v-for="item in selected.replies" :key="item.repliedAt"><Tag :value="item.party" /><strong>{{ item.owner }}</strong><p>{{ item.content }}</p><span>{{ item.evidence }} · {{ item.repliedAt.replace('T', ' ').slice(0, 16) }}</span></article></div>
       <div class="decision-band"><Textarea v-model="retest.note" rows="2" placeholder="验收决定说明，带条件接受时必须填写限制条件" /><Button label="通过并关闭" @click="decide('已关闭')" /><Button label="带条件接受" severity="secondary" outlined @click="decide('带条件通过')" /><Button label="退回整改" severity="danger" outlined @click="decide('整改中')" /></div>
     </div>
@@ -70,6 +88,14 @@ function decide(status: '已关闭' | '带条件通过' | '整改中') {
     <Dialog v-model:visible="retestVisible" header="登记联合复验" modal :style="{ width: '520px' }">
       <div class="edit-grid"><label>复验结果<Textarea v-model="retest.result" rows="4" /></label><label>结论<Select v-model="retest.passed" :options="[{ label: '通过', value: true }, { label: '不通过', value: false }]" /></label></div>
       <template #footer><Button label="取消" text severity="secondary" @click="retestVisible = false" /><Button label="提交复验轮次" @click="submitRetest" /></template>
+    </Dialog>
+    <Dialog v-model:visible="reopenVisible" header="交付后缺陷重开（依赖链失效）" modal :style="{ width: '540px' }">
+      <div class="edit-grid">
+        <label>提出方<Select v-model="reopenForm.party" :options="['建设单位', '设备厂家', '运维单位']" /></label>
+        <label>提出人<InputText v-model="reopenForm.owner" placeholder="如：罗宇" /></label>
+        <label class="wide">重开原因（送电后复现情况与证据）<Textarea v-model="reopenForm.reason" rows="4" placeholder="重开后该缺陷所在设备节点及全部上游节点失效，链外节点保持有效" /></label>
+      </div>
+      <template #footer><Button label="取消" text severity="secondary" @click="reopenVisible = false" /><Button label="确认重开" severity="danger" @click="submitReopen" /></template>
     </Dialog>
   </section>
 </template>
