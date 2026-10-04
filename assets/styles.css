@@ -16,3 +16,39 @@ a { text-decoration: none; }
 .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }.edit-grid label { display: grid; gap: 6px; font-size: 12px; color: #65736f; }.detail-title { display: flex; justify-content: space-between; align-items: center; }.detail-title span { color: #74817e; font-size: 11px; }.detail-title h3 { margin: 5px 0 0; }
 .reply-list { display: grid; gap: 8px; margin: 15px 0; }.reply-list article { border-left: 3px solid #2c6757; background: #f5f8f7; padding: 11px; display: grid; grid-template-columns: 90px 120px 1fr 220px; align-items: center; gap: 8px; }.reply-list p { margin: 0; font-size: 12px; }.reply-list span { color: #74817e; font-size: 10px; }
 .decision-band { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; border-top: 1px solid #dfe5e3; padding-top: 14px; }.preflight-panel { display: flex; justify-content: space-between; align-items: center; margin: 0 0 18px; border-left: 4px solid #d2a43c; }.preflight-panel span, .preflight-panel strong, .preflight-panel p { display: block; }.preflight-panel span { color: #758480; font-size: 11px; }.preflight-panel strong { margin: 5px 0; }.preflight-panel p { color: #9e3e38; font-size: 11px; margin: 3px 0; }
+
+/* 修订链 */
+.revision-bar { display: flex; align-items: center; gap: 14px; padding: 11px 28px; background: #f1f6f4; border-bottom: 1px solid #d9e1df; }
+.revision-bar.viewing { background: #fdf6e7; border-bottom-color: #e4cfa0; }
+.revision-bar > i { font-size: 17px; color: #2c6757; }
+.rb-main { min-width: 300px; }.rb-main strong { display: block; font-size: 13px; color: #1b4338; }.rb-main small { color: #758480; font-size: 11px; }
+.rb-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.rb-nodes { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.rb-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 12px; font-size: 11px; }
+.rb-chip.blocker { background: #fdeceb; color: #9e3e38; border: 1px solid #f0c2be; }
+.head-actions { display: flex; align-items: center; gap: 10px; }
+.mb14 { margin-bottom: 14px; }
+.version-shift { color: #b06a00; font-weight: 700; font-size: 11px; }
+.invalidation-panel { background: #fff8ef; border: 1px solid #ecd9b4; border-left: 4px solid #d2a43c; padding: 13px 16px; margin-bottom: 14px; }
+.invalidation-panel h3 { margin: 0 0 9px; font-size: 13px; color: #8a5a10; display: flex; align-items: center; gap: 7px; }
+.invalidation-panel article { background: white; border: 1px solid #ecdfc4; padding: 9px 11px; margin-bottom: 7px; display: grid; grid-template-columns: 90px 240px 1fr; gap: 8px 12px; align-items: center; }
+.invalidation-panel article small { grid-column: 2 / -1; color: #8d8067; font-size: 10px; }.invalidation-panel p { margin: 0; font-size: 12px; color: #5d513a; }
+.review-tip { font-size: 12px; color: #6d7c78; margin: 0 0 12px; }.edit-grid label.full { grid-column: 1 / -1; }
+.empty-panel, .empty-hint { background: white; border: 1px dashed #c9d4d0; color: #7d8b87; font-size: 12px; padding: 14px 16px; margin-bottom: 14px; }
+.chain-text { font-size: 11px; color: #1b4338; }
+.preflight-actions { display: flex; gap: 8px; }
+
+/* 离线同步 */
+.sync-panel { background: white; border: 1px solid #dbe2e0; padding: 16px; }
+.sync-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.sync-ops .toolbar { flex-wrap: wrap; }
+.sync-json { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; }
+.fail-check { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: #5d6b67; }
+.cursor-hint { color: #9e3e38; font-size: 11px; }.cursor-hint i { margin-right: 4px; }
+.sync-hint { color: #8a9793; font-size: 10px; margin: 8px 0 0; }
+.sync-conflicts h3 { margin: 0 0 10px; font-size: 14px; }
+.conflict-item { border: 1px solid #ead2cf; border-left: 3px solid #c05a50; padding: 10px 12px; margin-bottom: 9px; background: #fdf7f6; }
+.conflict-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }.conflict-head strong { font-size: 12px; flex: 1; }
+.conflict-values { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }.conflict-values span { font-size: 11px; color: #5d4e4b; background: white; border: 1px solid #ecdedc; padding: 5px 8px; }
+.conflict-item small { color: #9a8b87; font-size: 10px; }.conflict-actions { margin-top: 8px; display: flex; gap: 8px; }
+.aside-state .p-tag { margin: 2px 0; width: fit-content; }
